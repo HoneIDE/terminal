@@ -9,6 +9,9 @@ export default {
     macos: {
       ffi: '../../native/macos/',
     },
+    windows: {
+      ffi: '../../native/windows/',
+    },
   },
   dev: {
     defaultTarget: 'macos',

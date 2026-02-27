@@ -17,9 +17,19 @@ cargo check                 # Type check Rust
 cargo build --release       # Build libhone_terminal_macos.a
 cargo run --example demo_terminal  # Standalone Rust demo
 
-# Perry demo app
+# Rust FFI crate (Windows)
+cd native/windows
+cargo check                 # Type check Rust
+cargo build --release       # Build hone_terminal_windows.lib
+cargo run --example demo_terminal  # Standalone Rust demo
+
+# Perry demo app (macOS)
 ./examples/standalone-terminal/build.sh   # Full build (Rust + Perry + link)
 ./examples/standalone-terminal/hone-terminal-demo  # Run
+
+# Perry demo app (Windows)
+examples\standalone-terminal\build-windows.bat
+examples\standalone-terminal\hone-terminal-demo.exe
 ```
 
 ## Architecture
@@ -41,6 +51,13 @@ cargo run --example demo_terminal  # Standalone Rust demo
 - **`native/macos/src/grid_renderer.rs`** — Core Text font rendering. `FontSet` with normal/bold/italic/bold-italic variants via `clone_with_symbolic_traits`.
 - **`native/macos/src/view.rs`** — `HoneTerminalView` NSView subclass registered via objc runtime. Handles drawRect, keyboard, mouse, scroll input.
 
+### Rust FFI (Windows)
+
+- **`native/windows/src/lib.rs`** — 10 `#[no_mangle] extern "C"` functions + `hone_terminal_show_demo` demo function. Same FFI contract as macOS. Default font: Consolas.
+- **`native/windows/src/terminal_view.rs`** — `TerminalView` struct: same data model as macOS. `draw()` renders via `ID2D1RenderTarget` (Direct2D). Uses `InvalidateRect` for redraw.
+- **`native/windows/src/grid_renderer.rs`** — DirectWrite font rendering. `FontSet` with 4 `IDWriteTextFormat` variants (weight/style params). Fallback: Consolas → Courier New.
+- **`native/windows/src/view.rs`** — `HoneTerminalView` Win32 `WNDCLASSEXW` + `WndProc`. Handles WM_PAINT (Direct2D), WM_SIZE (render target resize), WM_CHAR/KEYDOWN, WM_LBUTTONDOWN, WM_MOUSEWHEEL.
+
 ## Key conventions
 
 - **No `const enum`** — Perry doesn't support TypeScript `const enum`. Use plain numeric constants with a companion object (`State_Ground = 0; const State = { Ground: State_Ground } as const`).
@@ -54,11 +71,19 @@ cargo run --example demo_terminal  # Standalone Rust demo
 
 Perry doesn't yet auto-link FFI crates. The manual process is:
 
+**macOS:**
 1. `cargo build --release` in `native/macos/` → produces `libhone_terminal_macos.a`
 2. `perry compile main.ts --no-link --keep-intermediates` → produces `main_ts.o`
 3. `clang++ main_ts.o -lhone_terminal_macos -lperry_runtime -lperry_stdlib -lperry_ui_macos -framework AppKit ...` → linked binary
 
 The `examples/standalone-terminal/build.sh` script automates this.
+
+**Windows:**
+1. `cargo build --release` in `native/windows/` → produces `hone_terminal_windows.lib`
+2. `perry compile main.ts --no-link --keep-intermediates` → produces `main_ts.obj`
+3. `link.exe main_ts.obj hone_terminal_windows.lib perry_runtime.lib ... d2d1.lib dwrite.lib user32.lib ...` → linked binary
+
+The `examples/standalone-terminal/build-windows.bat` script automates this.
 
 ## Test structure
 
@@ -69,7 +94,15 @@ Tests use Bun's built-in test runner. All tests are in `tests/` mirroring `core/
 - `tests/input/` — key encoding, mouse encoding
 - `tests/emulator.test.ts` — integration tests for the full emulator
 
+## Windows-specific notes
+
+- **COM initialization** — Direct2D/DirectWrite require `CoInitializeEx(COINIT_APARTMENTTHREADED)` before use.
+- **`windows` crate features** — `Foundation_Numerics` is required for `CreateSolidColorBrush` and other D2D rendering methods. Parent interface methods (e.g. `ID2D1RenderTarget` methods) are not inherited via Deref in v0.58; use `Interface::cast()` to access them from `ID2D1HwndRenderTarget`.
+- **Render target recreation** — Handle `D2DERR_RECREATE_TARGET` from `EndDraw()` by discarding and recreating on next WM_PAINT.
+- **`BeginPaint`/`EndPaint`** — Must call in WM_PAINT even though D2D renders independently, otherwise WM_PAINT re-posts infinitely.
+
 ## Dependencies
 
 - **TypeScript**: zero runtime dependencies (Bun for testing only)
 - **Rust (macOS)**: core-text, core-graphics, cocoa, objc, serde_json, core-foundation-sys
+- **Rust (Windows)**: windows (v0.58, Direct2D + DirectWrite + Win32), serde_json

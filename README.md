@@ -17,7 +17,7 @@ Cross-platform terminal emulator component for the Hone ecosystem. Published as 
 - **Scrollback** — configurable ring buffer (default 10,000 lines)
 - **Shell integration** — OSC 133 prompt/command/output markers
 - **Selection, copy, search** — across visible buffer and scrollback
-- **Native rendering** — Core Text (macOS), with FFI bridge for all 6 platforms
+- **Native rendering** — Core Text (macOS), Direct2D + DirectWrite (Windows), with FFI bridge for all 6 platforms
 
 ## Architecture
 
@@ -44,6 +44,11 @@ native/                 FFI bridge layer
     src/terminal_view.rs TerminalView state + draw() method
     src/grid_renderer.rs CTFont rendering with bold/italic variants
     src/view.rs         HoneTerminalView NSView subclass
+  windows/              Rust crate: Direct2D + DirectWrite renderer
+    src/lib.rs          10 #[no_mangle] extern "C" FFI functions
+    src/terminal_view.rs TerminalView state + draw() via ID2D1RenderTarget
+    src/grid_renderer.rs IDWriteTextFormat rendering with bold/italic variants
+    src/view.rs         HoneTerminalView Win32 HWND + WndProc
 
 perry/                  Perry component API
   terminal-component.ts declare function FFI bindings + Terminal class
@@ -81,22 +86,33 @@ emulator.write('\x1b[32mHello\x1b[0m world');
 
 Prerequisites: [Perry](https://perry.dev) v0.2.162+, Rust toolchain, Bun
 
-```bash
-# Run the build script
-./examples/standalone-terminal/build.sh
+### macOS
 
-# Run the demo
+```bash
+./examples/standalone-terminal/build.sh
 ./examples/standalone-terminal/hone-terminal-demo
+```
+
+### Windows
+
+```bat
+examples\standalone-terminal\build-windows.bat
+examples\standalone-terminal\hone-terminal-demo.exe
 ```
 
 The demo opens two windows:
 1. **Perry UI** — info panel with a "Show Terminal" button
-2. **Native rendering** — 80x24 terminal grid rendered via Core Text, showing colors, attributes, cursor, and a simulated shell session
+2. **Native rendering** — 80x24 terminal grid rendered via Core Text (macOS) or Direct2D (Windows), showing colors, attributes, cursor, and a simulated shell session
 
 You can also run the Rust-only demo (no Perry needed):
 
 ```bash
+# macOS
 cd native/macos
+cargo run --example demo_terminal
+
+# Windows
+cd native/windows
 cargo run --example demo_terminal
 ```
 
