@@ -1,0 +1,14 @@
+node_modules/
+dist/
+target/
+*.a
+*.lib
+*.wasm
+*.dylib
+*.so
+*.dll
+*.o
+.DS_Store
+
+# Compiled Perry demo binaries
+examples/standalone-terminal/hone-terminal-demo

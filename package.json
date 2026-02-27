@@ -1,0 +1,69 @@
+{
+  "name": "@honeide/terminal",
+  "version": "0.1.0",
+  "description": "Cross-platform terminal emulator component for Perry applications",
+  "main": "core/index.ts",
+  "types": "core/index.ts",
+  "exports": {
+    ".": "./core/index.ts",
+    "./perry": "./perry/index.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "test:watch": "bun test --watch"
+  },
+  "keywords": ["terminal", "emulator", "vt100", "xterm", "perry", "native"],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.7.0"
+  },
+  "perry": {
+    "nativeLibrary": {
+      "module": "@honeide/terminal",
+      "functions": [
+        { "name": "hone_terminal_create", "params": ["i32", "i32"], "returns": "i64" },
+        { "name": "hone_terminal_destroy", "params": ["i64"], "returns": "void" },
+        { "name": "hone_terminal_set_font", "params": ["i64", "i64", "f64"], "returns": "void" },
+        { "name": "hone_terminal_render_cells", "params": ["i64", "i64", "i32", "i32"], "returns": "void" },
+        { "name": "hone_terminal_set_cursor", "params": ["i64", "i32", "i32", "i32", "i32"], "returns": "void" },
+        { "name": "hone_terminal_resize", "params": ["i64", "i32", "i32"], "returns": "void" },
+        { "name": "hone_terminal_set_selection", "params": ["i64", "i64"], "returns": "void" },
+        { "name": "hone_terminal_scroll", "params": ["i64", "i32"], "returns": "void" },
+        { "name": "hone_terminal_set_theme", "params": ["i64", "i64"], "returns": "void" },
+        { "name": "hone_terminal_get_cell_size", "params": ["i64", "i64", "i64"], "returns": "void" },
+        { "name": "hone_terminal_show_demo", "params": [], "returns": "void" }
+      ],
+      "targets": {
+        "macos": {
+          "crate": "native/macos/",
+          "lib": "libhone_terminal_macos.a",
+          "frameworks": ["CoreText", "CoreGraphics", "CoreFoundation", "Metal", "QuartzCore"]
+        },
+        "ios": {
+          "crate": "native/ios/",
+          "lib": "libhone_terminal_ios.a",
+          "frameworks": ["CoreText", "CoreGraphics", "CoreFoundation", "UIKit"]
+        },
+        "windows": {
+          "crate": "native/windows/",
+          "lib": "hone_terminal_windows.lib",
+          "libs": ["dwrite", "d2d1", "dcomp"]
+        },
+        "linux": {
+          "crate": "native/linux/",
+          "lib": "libhone_terminal_linux.a",
+          "pkgConfig": ["pango", "pangocairo", "cairo"]
+        },
+        "android": {
+          "crate": "native/android/",
+          "lib": "libhone_terminal_android.a"
+        },
+        "web": {
+          "crate": "native/web/",
+          "lib": "hone_terminal_web.wasm"
+        }
+      }
+    }
+  }
+}
