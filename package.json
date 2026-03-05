@@ -6,7 +6,8 @@
   "types": "core/index.ts",
   "exports": {
     ".": "./core/index.ts",
-    "./perry": "./perry/index.ts"
+    "./perry": "./perry/index.ts",
+    "./perry/live": "./perry/live.ts"
   },
   "scripts": {
     "test": "bun test",
@@ -27,12 +28,17 @@
         { "name": "hone_terminal_set_font", "params": ["i64", "i64", "f64"], "returns": "void" },
         { "name": "hone_terminal_render_cells", "params": ["i64", "i64", "i32", "i32"], "returns": "void" },
         { "name": "hone_terminal_set_cursor", "params": ["i64", "i32", "i32", "i32", "i32"], "returns": "void" },
-        { "name": "hone_terminal_resize", "params": ["i64", "i32", "i32"], "returns": "void" },
+        { "name": "hone_terminal_resize", "params": ["i64", "f64", "f64"], "returns": "i64" },
         { "name": "hone_terminal_set_selection", "params": ["i64", "i64"], "returns": "void" },
         { "name": "hone_terminal_scroll", "params": ["i64", "i32"], "returns": "void" },
         { "name": "hone_terminal_set_theme", "params": ["i64", "i64"], "returns": "void" },
         { "name": "hone_terminal_get_cell_size", "params": ["i64", "i64", "i64"], "returns": "void" },
-        { "name": "hone_terminal_show_demo", "params": [], "returns": "void" }
+        { "name": "hone_terminal_show_demo", "params": [], "returns": "void" },
+        { "name": "hone_terminal_open", "params": ["f64", "f64", "i64", "i64"], "returns": "i64" },
+        { "name": "hone_terminal_nsview", "params": ["i64"], "returns": "i64" },
+        { "name": "hone_terminal_poll", "params": ["i64"], "returns": "i64" },
+        { "name": "hone_terminal_write", "params": ["i64", "i64"], "returns": "i64" },
+        { "name": "hone_terminal_close", "params": ["i64"], "returns": "i64" }
       ],
       "targets": {
         "macos": {
