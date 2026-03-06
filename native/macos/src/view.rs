@@ -42,6 +42,8 @@ pub fn register_class() {
         decl.add_ivar::<*mut c_void>("honeInputCallbacks");
         decl.add_ivar::<i64>("honePtyFd");          // PTY master fd (-1 = legacy mode)
         decl.add_ivar::<i64>("honeAppCursorKeys");   // 1 = application cursor mode
+        decl.add_ivar::<f64>("honeIntrinsicW");      // intrinsic width in pixels
+        decl.add_ivar::<f64>("honeIntrinsicH");      // intrinsic height in pixels
 
         // Required overrides
         unsafe {
@@ -82,6 +84,14 @@ pub fn register_class() {
                 sel!(flagsChanged:),
                 flags_changed as extern "C" fn(&Object, Sel, id),
             );
+            decl.add_method(
+                sel!(intrinsicContentSize),
+                intrinsic_content_size as extern "C" fn(&Object, Sel) -> cocoa::foundation::NSSize,
+            );
+            decl.add_method(
+                sel!(viewDidMoveToWindow),
+                view_did_move_to_window as extern "C" fn(&Object, Sel),
+            );
         }
 
         decl.register();
@@ -113,6 +123,8 @@ pub fn create_nsview(terminal_view: &mut TerminalView, frame: NSRect) -> id {
         // No PTY by default (legacy mode)
         (*view).set_ivar::<i64>("honePtyFd", -1);
         (*view).set_ivar::<i64>("honeAppCursorKeys", 0);
+        (*view).set_ivar::<f64>("honeIntrinsicW", frame.size.width);
+        (*view).set_ivar::<f64>("honeIntrinsicH", frame.size.height);
 
         terminal_view.nsview = Some(view);
         view
@@ -420,4 +432,25 @@ extern "C" fn reset_cursor_rects(this: &Object, _sel: Sel) {
 extern "C" fn flags_changed(_this: &Object, _sel: Sel, _event: id) {
     // Handle modifier key changes (needed for proper key event processing)
     // No action needed — we read modifier flags in keyDown:
+}
+
+/// Return intrinsic content size so Auto Layout (NSStackView Fill distribution)
+/// gives this view non-zero space.
+extern "C" fn intrinsic_content_size(this: &Object, _sel: Sel) -> cocoa::foundation::NSSize {
+    unsafe {
+        let w: f64 = *this.get_ivar("honeIntrinsicW");
+        let h: f64 = *this.get_ivar("honeIntrinsicH");
+        cocoa::foundation::NSSize::new(w, h)
+    }
+}
+
+/// Auto-become first responder when added to a window so the terminal
+/// receives keyboard input immediately (no click required).
+extern "C" fn view_did_move_to_window(this: &Object, _sel: Sel) {
+    unsafe {
+        let window: id = msg_send![this, window];
+        if window != nil {
+            let _: () = msg_send![window, makeFirstResponder: this];
+        }
+    }
 }
