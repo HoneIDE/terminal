@@ -1,10 +1,15 @@
 /**
- * Live (PTY-backed) terminal marker module.
- *
- * Importing this triggers Perry to discover @honeide/terminal's FFI manifest
- * and link the platform-native terminal library. The exported constant is
- * unused at runtime — it only exists so Perry can track the import.
+ * LiveTerminal FFI declarations for Perry.
+ * Import this module to trigger Perry's package.json FFI discovery.
  */
 
-// Sentinel that confirms the live terminal FFI is available.
-export const TERMINAL_LIVE = 1 as const;
+// FFI declarations resolved by Perry codegen from package.json manifest
+declare function hone_terminal_open(rows: number, cols: number, shell: number, cwd: number): number;
+declare function hone_terminal_nsview(handle: number): number;
+declare function hone_terminal_poll(handle: number): number;
+declare function hone_terminal_write(handle: number, data: number): number;
+declare function hone_terminal_resize(handle: number, rows: number, cols: number): number;
+declare function hone_terminal_close(handle: number): number;
+
+// Re-export so Perry includes this module
+export const TERMINAL_LIVE = 1;
