@@ -151,6 +151,87 @@ pub extern "C" fn hone_terminal_get_cell_size(
 }
 
 // ============================================================================
+// LiveTerminal API stubs (PTY-backed terminal — not yet implemented on Linux)
+// These allow the IDE to link on Linux. Real PTY+GTK4 embedding is a future task.
+// ============================================================================
+
+/// Open a PTY-backed terminal. Returns an opaque handle (0 = not available).
+#[no_mangle]
+pub extern "C" fn hone_terminal_open(_rows: i32, _cols: i32, _shell: i64, _cwd: i64) -> i64 {
+    0
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_open(_rows: i32, _cols: i32, _shell: i64, _cwd: i64) -> i64 {
+    0
+}
+
+/// Return a native widget pointer for embedding (0 = not available on Linux).
+#[no_mangle]
+pub extern "C" fn hone_terminal_nsview(_handle: i64) -> i64 {
+    0
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_nsview(_handle: i64) -> i64 {
+    0
+}
+
+/// Poll the terminal for pending output. Returns 0 (no updates).
+#[no_mangle]
+pub extern "C" fn hone_terminal_poll(_handle: i64) -> i32 {
+    0
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_poll(_handle: i64) -> i32 {
+    0
+}
+
+/// Write data to the terminal PTY (no-op stub).
+#[no_mangle]
+pub extern "C" fn hone_terminal_write(_handle: i64, _data: i64) -> i32 {
+    0
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_write(_handle: i64, _data: i64) -> i32 {
+    0
+}
+
+/// Close the PTY-backed terminal (no-op stub).
+#[no_mangle]
+pub extern "C" fn hone_terminal_close(_handle: i64) -> i32 {
+    0
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_close(_handle: i64) -> i32 {
+    0
+}
+
+// ============================================================================
+// Editor FFI stubs (editor native view — not yet available on Linux)
+// ============================================================================
+
+/// Return a native editor view pointer (0 = not available on Linux yet).
+#[no_mangle]
+pub extern "C" fn hone_editor_nsview(_handle: i64) -> i64 {
+    0
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_editor_nsview(_handle: i64) -> i64 {
+    0
+}
+
+// ============================================================================
 // Demo
 // ============================================================================
 

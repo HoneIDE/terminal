@@ -6,7 +6,8 @@
   "types": "core/index.ts",
   "exports": {
     ".": "./core/index.ts",
-    "./perry": "./perry/index.ts"
+    "./perry": "./perry/index.ts",
+    "./perry/live": "./perry/live.ts"
   },
   "scripts": {
     "test": "bun test",
@@ -53,7 +54,7 @@
         "linux": {
           "crate": "native/linux/",
           "lib": "libhone_terminal_linux.a",
-          "pkgConfig": ["pango", "pangocairo", "cairo"]
+          "pkgConfig": ["pango", "pangocairo", "cairo", "x11"]
         },
         "android": {
           "crate": "native/android/",
