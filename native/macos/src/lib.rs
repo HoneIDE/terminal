@@ -215,6 +215,61 @@ pub extern "C" fn hone_terminal_resize(
     1
 }
 
+/// Set the color theme on a live terminal.
+/// theme_json is a Perry NaN-boxed string pointer to JSON: {"background":"#hex","foreground":"#hex","cursor":"#hex","selection_background":"#hex"}
+#[no_mangle]
+pub extern "C" fn hone_terminal_live_set_theme(
+    handle: *mut LiveTerminal,
+    theme_json_ptr: *const u8,
+) {
+    if handle.is_null() { return; }
+    let live = unsafe { &mut *handle };
+    let json_str = str_from_header(theme_json_ptr);
+    if json_str.is_empty() { return; }
+    live.terminal_view.set_theme(json_str);
+    // Trigger redraw
+    unsafe {
+        use objc::msg_send;
+        use objc::sel;
+        use objc::sel_impl;
+        let _: () = msg_send![live.view, setNeedsDisplay: true];
+    }
+}
+
+/// Set terminal background and foreground colors directly (no JSON).
+#[no_mangle]
+pub extern "C" fn hone_terminal_set_bg_fg(
+    handle: *mut LiveTerminal,
+    bg_r: f64, bg_g: f64, bg_b: f64,
+    fg_r: f64, fg_g: f64, fg_b: f64,
+) {
+    if handle.is_null() { return; }
+    let live = unsafe { &mut *handle };
+
+    // Update the TerminalView's rendering colors
+    live.terminal_view.set_bg_fg(bg_r, bg_g, bg_b, fg_r, fg_g, fg_b);
+
+    // Update the TerminalState's default colors so Color::Default resolves to theme colors
+    live.state.default_bg = [(bg_r * 255.0) as u8, (bg_g * 255.0) as u8, (bg_b * 255.0) as u8];
+    live.state.default_fg = [(fg_r * 255.0) as u8, (fg_g * 255.0) as u8, (fg_b * 255.0) as u8];
+    live.state.dirty = true;
+
+    // Also set the NSView layer background as a belt-and-suspenders approach
+    unsafe {
+        use objc::{class, msg_send, sel, sel_impl};
+        let _: () = msg_send![live.view, setWantsLayer: cocoa::base::YES];
+        let layer: id = msg_send![live.view, layer];
+        if layer != cocoa::base::nil {
+            let ns_color: id = msg_send![class!(NSColor), colorWithRed:bg_r green:bg_g blue:bg_b alpha:1.0f64];
+            let cg_color: *const std::os::raw::c_void = msg_send![ns_color, CGColor];
+            let _: () = msg_send![layer, setBackgroundColor: cg_color];
+        }
+    }
+
+    // Force a full re-render so cells pick up new default colors
+    sync_render(live);
+}
+
 /// Close the terminal: kill shell, close PTY, free resources.
 #[no_mangle]
 pub extern "C" fn hone_terminal_close(handle: *mut LiveTerminal) -> i64 {
@@ -273,6 +328,24 @@ pub extern "C" fn __wrapper_hone_terminal_resize(
 #[allow(non_snake_case)]
 pub extern "C" fn __wrapper_hone_terminal_close(handle: *mut LiveTerminal) -> i64 {
     hone_terminal_close(handle)
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_live_set_theme(
+    handle: *mut LiveTerminal, theme_json_ptr: *const u8,
+) {
+    hone_terminal_live_set_theme(handle, theme_json_ptr)
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_set_bg_fg(
+    handle: *mut LiveTerminal,
+    bg_r: f64, bg_g: f64, bg_b: f64,
+    fg_r: f64, fg_g: f64, fg_b: f64,
+) {
+    hone_terminal_set_bg_fg(handle, bg_r, bg_g, bg_b, fg_r, fg_g, fg_b)
 }
 
 /// Sync TerminalState → TerminalView cells + cursor, then invalidate.

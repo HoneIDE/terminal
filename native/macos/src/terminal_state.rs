@@ -19,14 +19,11 @@ pub enum Color {
 
 impl Color {
     /// Convert to RGB tuple. Uses xterm-256 color palette for Indexed.
-    pub fn to_rgb(&self, is_fg: bool) -> [u8; 3] {
+    /// `default_fg` and `default_bg` are used when the color is `Color::Default`.
+    pub fn to_rgb(&self, is_fg: bool, default_fg: [u8; 3], default_bg: [u8; 3]) -> [u8; 3] {
         match *self {
             Color::Default => {
-                if is_fg {
-                    [205, 214, 244] // #cdd6f4
-                } else {
-                    [30, 30, 46] // #1e1e2e
-                }
+                if is_fg { default_fg } else { default_bg }
             }
             Color::Indexed(idx) => index_to_rgb(idx),
             Color::Rgb(r, g, b) => [r, g, b],
@@ -215,6 +212,10 @@ pub struct TerminalState {
 
     // Pending DSR response to write back to PTY
     pub pending_response: Option<Vec<u8>>,
+
+    // Configurable default colors (updated via theme/set_bg_fg)
+    pub default_fg: [u8; 3],
+    pub default_bg: [u8; 3],
 }
 
 impl TerminalState {
@@ -262,6 +263,8 @@ impl TerminalState {
             dirty: false,
             title: String::new(),
             pending_response: None,
+            default_fg: [205, 214, 244], // #cdd6f4
+            default_bg: [30, 30, 46],    // #1e1e2e
         }
     }
 
@@ -312,9 +315,9 @@ impl TerminalState {
             for col in 0..self.cols {
                 let cell = &self.grid[row][col];
                 let (fg, bg) = if cell.inverse {
-                    (cell.bg.to_rgb(false), cell.fg.to_rgb(true))
+                    (cell.bg.to_rgb(false, self.default_fg, self.default_bg), cell.fg.to_rgb(true, self.default_fg, self.default_bg))
                 } else {
-                    (cell.fg.to_rgb(true), cell.bg.to_rgb(false))
+                    (cell.fg.to_rgb(true, self.default_fg, self.default_bg), cell.bg.to_rgb(false, self.default_fg, self.default_bg))
                 };
                 render_row.push(RenderCell {
                     c: if cell.hidden {
