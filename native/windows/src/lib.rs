@@ -162,6 +162,63 @@ pub extern "C" fn hone_terminal_show_demo() {
     hone_terminal_show_demo_impl();
 }
 
+// ============================================================================
+// LiveTerminal theme stubs (not yet implemented on Windows)
+// ============================================================================
+
+#[no_mangle]
+pub extern "C" fn hone_terminal_live_set_theme(_handle: i64, _theme_json: i64) {}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_live_set_theme(_handle: i64, _theme_json: i64) {}
+
+#[no_mangle]
+pub extern "C" fn hone_terminal_set_bg_fg(_handle: i64, _bg_r: f64, _bg_g: f64, _bg_b: f64, _fg_r: f64, _fg_g: f64, _fg_b: f64) {}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_set_bg_fg(_handle: i64, _bg_r: f64, _bg_g: f64, _bg_b: f64, _fg_r: f64, _fg_g: f64, _fg_b: f64) {}
+
+// ============================================================================
+// LiveTerminal PTY stubs (not yet implemented on Windows)
+// ============================================================================
+
+#[no_mangle]
+pub extern "C" fn hone_terminal_open(_rows: f64, _cols: f64, _shell: i64, _cwd: i64) -> i64 { 0 }
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_open(_rows: f64, _cols: f64, _shell: i64, _cwd: i64) -> i64 { 0 }
+
+#[no_mangle]
+pub extern "C" fn hone_terminal_nsview(_handle: i64) -> i64 { 0 }
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_nsview(_handle: i64) -> i64 { 0 }
+
+#[no_mangle]
+pub extern "C" fn hone_terminal_poll(_handle: i64) -> i64 { 0 }
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_poll(_handle: i64) -> i64 { 0 }
+
+#[no_mangle]
+pub extern "C" fn hone_terminal_write(_handle: i64, _data: i64) -> i64 { 0 }
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_write(_handle: i64, _data: i64) -> i64 { 0 }
+
+#[no_mangle]
+pub extern "C" fn hone_terminal_close(_handle: i64) -> i64 { 0 }
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_close(_handle: i64) -> i64 { 0 }
+
 /// Perry codegen wrapper — Perry calls `__wrapper_<name>` for FFI functions.
 #[no_mangle]
 #[allow(non_snake_case)]

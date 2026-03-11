@@ -215,6 +215,22 @@ pub extern "C" fn __wrapper_hone_terminal_close(_handle: i64) -> i32 {
     0
 }
 
+/// Set terminal theme from JSON (no-op stub).
+#[no_mangle]
+pub extern "C" fn hone_terminal_live_set_theme(_handle: i64, _theme_json: i64) {}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_live_set_theme(_handle: i64, _theme_json: i64) {}
+
+/// Set terminal bg/fg colors directly (no-op stub).
+#[no_mangle]
+pub extern "C" fn hone_terminal_set_bg_fg(_handle: i64, _bg_r: f64, _bg_g: f64, _bg_b: f64, _fg_r: f64, _fg_g: f64, _fg_b: f64) {}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn __wrapper_hone_terminal_set_bg_fg(_handle: i64, _bg_r: f64, _bg_g: f64, _bg_b: f64, _fg_r: f64, _fg_g: f64, _fg_b: f64) {}
+
 // ============================================================================
 // Editor FFI stubs (editor native view — not yet available on Linux)
 // ============================================================================

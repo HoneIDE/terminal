@@ -1,0 +1,8 @@
+[package]
+name = "hone-terminal-ios"
+version = "0.1.0"
+edition = "2021"
+description = "iOS stub for Hone Terminal (not yet implemented)"
+
+[lib]
+crate-type = ["staticlib"]
