@@ -160,6 +160,14 @@ impl TerminalView {
         }
     }
 
+    /// Set background and foreground colors directly (no JSON parsing).
+    pub fn set_bg_fg(&mut self, bg_r: f64, bg_g: f64, bg_b: f64, fg_r: f64, fg_g: f64, fg_b: f64) {
+        self.bg_color = (bg_r, bg_g, bg_b);
+        self.fg_color = (fg_r, fg_g, fg_b);
+        self.cursor_color = (fg_r, fg_g, fg_b);
+        self.invalidate();
+    }
+
     pub fn render_cells(&mut self, json: &str, start_row: usize, _end_row: usize) {
         if let Ok(rows) = serde_json::from_str::<Vec<Vec<RenderCell>>>(json) {
             for (i, row_cells) in rows.into_iter().enumerate() {

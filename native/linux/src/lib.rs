@@ -215,21 +215,45 @@ pub extern "C" fn __wrapper_hone_terminal_close(_handle: i64) -> i32 {
     0
 }
 
-/// Set terminal theme from JSON (no-op stub).
+/// Set theme via JSON on a live terminal view.
+/// handle is a *mut TerminalView (or null if no live terminal).
 #[no_mangle]
-pub extern "C" fn hone_terminal_live_set_theme(_handle: i64, _theme_json: i64) {}
+pub extern "C" fn hone_terminal_live_set_theme(handle: i64, theme_json: *const c_char) {
+    if handle == 0 { return; }
+    let view = unsafe { &mut *(handle as *mut TerminalView) };
+    let json_str = unsafe { CStr::from_ptr(theme_json) }
+        .to_str()
+        .unwrap_or("{}");
+    view.set_theme(json_str);
+}
 
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn __wrapper_hone_terminal_live_set_theme(_handle: i64, _theme_json: i64) {}
+pub extern "C" fn __wrapper_hone_terminal_live_set_theme(handle: i64, theme_json: *const c_char) {
+    hone_terminal_live_set_theme(handle, theme_json);
+}
 
-/// Set terminal bg/fg colors directly (no-op stub).
+/// Set terminal background and foreground colors directly.
 #[no_mangle]
-pub extern "C" fn hone_terminal_set_bg_fg(_handle: i64, _bg_r: f64, _bg_g: f64, _bg_b: f64, _fg_r: f64, _fg_g: f64, _fg_b: f64) {}
+pub extern "C" fn hone_terminal_set_bg_fg(
+    handle: i64,
+    bg_r: f64, bg_g: f64, bg_b: f64,
+    fg_r: f64, fg_g: f64, fg_b: f64,
+) {
+    if handle == 0 { return; }
+    let view = unsafe { &mut *(handle as *mut TerminalView) };
+    view.set_bg_fg(bg_r, bg_g, bg_b, fg_r, fg_g, fg_b);
+}
 
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "C" fn __wrapper_hone_terminal_set_bg_fg(_handle: i64, _bg_r: f64, _bg_g: f64, _bg_b: f64, _fg_r: f64, _fg_g: f64, _fg_b: f64) {}
+pub extern "C" fn __wrapper_hone_terminal_set_bg_fg(
+    handle: i64,
+    bg_r: f64, bg_g: f64, bg_b: f64,
+    fg_r: f64, fg_g: f64, fg_b: f64,
+) {
+    hone_terminal_set_bg_fg(handle, bg_r, bg_g, bg_b, fg_r, fg_g, fg_b);
+}
 
 // ============================================================================
 // Editor FFI stubs (editor native view — not yet available on Linux)
