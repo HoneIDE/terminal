@@ -21,6 +21,7 @@
   },
   "perry": {
     "nativeLibrary": {
+      "abiVersion": "0.5",
       "module": "@honeide/terminal",
       "functions": [
         { "name": "hone_terminal_create", "params": ["i32", "i32"], "returns": "i64" },
