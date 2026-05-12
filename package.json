@@ -1,6 +1,6 @@
 {
   "name": "@honeide/terminal",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cross-platform terminal emulator component for Perry applications",
   "main": "core/index.ts",
   "types": "core/index.ts",
@@ -9,12 +9,34 @@
     "./perry": "./perry/index.ts",
     "./perry/live": "./perry/live.ts"
   },
+  "files": [
+    "core/",
+    "perry/",
+    "view-model/",
+    "perry.config.ts",
+    "native/*/src/**",
+    "native/*/Cargo.toml",
+    "native/*/Cargo.lock",
+    "native/*/README.md",
+    "native/*/build.rs"
+  ],
   "scripts": {
     "test": "bun test",
     "test:watch": "bun test --watch"
   },
-  "keywords": ["terminal", "emulator", "vt100", "xterm", "perry", "native"],
+  "keywords": ["hone", "terminal", "emulator", "vt100", "xterm", "perry", "native"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HoneIDE/terminal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HoneIDE/terminal/issues"
+  },
+  "homepage": "https://hone.codes",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "typescript": "^5.7.0"

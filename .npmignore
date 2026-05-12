@@ -1,0 +1,20 @@
+# Build artifacts (Cargo, Gradle, Perry intermediates)
+target/
+build/
+.gradle/
+dist/
+node_modules/
+*.dylib
+*.so
+*.dll
+*.a
+*.o
+*.wasm
+
+# Repo metadata not needed by consumers
+bun.lock
+tsconfig.json
+PROJECT_PLAN.md
+CLAUDE.md
+tests/
+.DS_Store
